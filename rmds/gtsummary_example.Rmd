@@ -21,14 +21,20 @@ Lets peek at the documentation for `gtsummary`
 
 <https://www.danieldsjoberg.com/gtsummary/>
 
-It is very common (especially in biomedical literature) for the first table of the paper to summarize attributes of the participants in the study. This is a first look at whether the study could have some built-in demographic bias.
+It is very common (especially in biomedical literature) for the first table of the paper to summarize attributes of the participants in the study.
+This is a first look at whether the study could have some built-in demographic bias.
 
 ```{r Table 1 type example from documentation}
 tbl_summary(trial, by = trt) 
-  #uses all variables in a given table, so table should be relatively clean before summarizing
+#uses all variables in a given table, so table should be relatively clean before summarizing
+
 ```
 
+![](../images/code_to_table.png)
+
 **Example 1 t-test: Summarizing/Comparing Two Groups**
+
+![](../images/draco_pic.jpeg)
 
 ```{r data import, message=FALSE, warning=FALSE}
 draco_ecomorph <- read_csv("../data/draco_ecomorph.csv")
@@ -46,7 +52,9 @@ table1 <-
 table1
 ```
 
-Note that the default here is median and IQR for summary statistics; not what we might want. You can change the default behavior by setting a theme, or define manually (I prefer manually for complete control). Its more customary to use mean and SD (or SE) to summarize groups since we are most likely going to use parametric statistics for comparison.
+Note that the default here is median and IQR for summary statistics; not what we might want.
+You can change the default behavior by setting a theme, or define manually (I prefer manually for complete control).
+Its more customary to use mean and SD (or SE) to summarize groups since we are most likely going to use parametric statistics for comparison.
 
 ```{r set builtin theme}
 theme_gtsummary_mean_sd(set_theme = TRUE)
@@ -151,7 +159,8 @@ table_Draco2 %>%
   #gt::gtsave(filename = "draco_ecomorph_table.pdf") #save file
 ```
 
-If data have missing values that make groups unbalanced, might have to make more than one table and combine them. Parts of a gt table: <https://gt.rstudio.com/articles/intro-creating-gt-tables.html>
+If data have missing values that make groups unbalanced, might have to make more than one table and combine them.
+Parts of a gt table: <https://gt.rstudio.com/articles/intro-creating-gt-tables.html>
 
 Advanced Customization
 
@@ -241,9 +250,11 @@ ggplot(model_1) +
   theme_cmg() #this was my theme defined in a script
 ```
 
-For tail length, the adjusted difference and P-value matches `gtsummary` output. There is not a noticeable difference in tail length between the sexes at the grand mean.
+For tail length, the adjusted difference and P-value matches `gtsummary` output.
+There is not a noticeable difference in tail length between the sexes at the grand mean.
 
-Notice also the technique for plotting an ANCOVA model using `fortify`. Open the `results` dataframe to see what a fortified dataset looks like; applies model calculations to the original dataset.
+Notice also the technique for plotting an ANCOVA model using `fortify`.
+Open the `results` dataframe to see what a fortified dataset looks like; applies model calculations to the original dataset.
 
 ```{r check model coefficients}
 summary(model_1)$coefficients["sexmale","Estimate"] #adjusted difference between marginal means
