@@ -243,6 +243,7 @@ summary(model_1)
 ```{r ANCOVA plot, message=FALSE, warning=FALSE}
 #make ANCOVA from a fit model; one of many ways to do this.
 model_1_fortified <- fortify(model_1)
+
 ggplot(model_1) +
   geom_point(aes(x = snout_vent_length_mm, y = tail_length_mm, color = sex)) +
   geom_line(aes(x = snout_vent_length_mm, y = .fitted, color = sex)) +
@@ -254,7 +255,7 @@ For tail length, the adjusted difference and P-value matches `gtsummary` output.
 There is not a noticeable difference in tail length between the sexes at the grand mean.
 
 Notice also the technique for plotting an ANCOVA model using `fortify`.
-Open the `results` dataframe to see what a fortified dataset looks like; applies model calculations to the original dataset.
+Open the `model_1_fortified` dataframe to see what a fortified dataset looks like; applies model calculations to the original dataset.
 
 ```{r check model coefficients}
 summary(model_1)$coefficients["sexmale","Estimate"] #adjusted difference between marginal means
