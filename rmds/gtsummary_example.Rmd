@@ -66,8 +66,15 @@ theme_gtsummary_mean_sd(set_theme = TRUE)
 #gtsummary works best with datasets without NA values, otherwise it attempts to report # of NAs (annoying)
 
 table_Draco1 <- draco_ecomorph %>%
-  filter(species =="bimaculatus") %>%
-  select(sex, snout_vent_length_mm, tail_length_mm, fore_limb_length_mm, fore_toe_length_mm, perch_height_cm) %>% 
+  filter(species == "bimaculatus") %>%
+  select(
+    sex,
+    snout_vent_length_mm,
+    tail_length_mm,
+    fore_limb_length_mm,
+    fore_toe_length_mm,
+    perch_height_cm
+  ) %>%
   #retain specific variables used in summaries rather than using all
   tbl_summary(
     by = sex,
@@ -75,27 +82,38 @@ table_Draco1 <- draco_ecomorph %>%
     # remove missing values (NAs). "ifany" will include a missing values row in table.
     digits = all_continuous() ~ 1,
     #number of displayed digits for continuous variables
+    statistic = list(all_continuous() ~ "{mean} ({sd})", #can use any character for parentheses
+                     all_categorical() ~ "{n}"), #count obs. for categorical variables
     label = list(
       snout_vent_length_mm ~ "SVL (mm)",
       tail_length_mm ~ "Tail Length (mm)",
       fore_limb_length_mm ~ "Forelimb Length (mm)",
       fore_toe_length_mm ~ "Foretoe Length (mm)",
-      perch_height_cm ~ "Perch Height (cm)"
-    ),
-    statistic = list(all_continuous() ~ "{mean} ({sd})", #can use any character for parentheses
-                     all_categorical() ~ "{n}") #count obs. for categorical variables
-  ) %>% 
-  add_p(pvalue_fun = ~ style_pvalue(.x, digits = 2)) %>% #number of digits displayed for p-values
+      perch_height_cm ~ "Perch Height (cm)"))
+
+table_Draco1
+```
+
+Now lets pretty the table up a bit and make it a statistical comparison table.
+
+```{r t-test example pretty the table, message=FALSE, warning=FALSE}
+table_Draco1 <- table_Draco1 %>%
+  add_p(test = all_continuous() ~ "t.test",
+        pvalue_fun = ~ style_pvalue(.x, digits = 2)) %>% #number of digits displayed for p-values
   modify_caption("Table 1. *Draco bimaculatus* Morphological Characteristics") %>%
+  modify_fmt_fun(statistic ~ style_sigfig) %>% #adjusts sig .figs. for test stat colum (t-value)
   modify_header(
     update = list(
       label ~ '',
-      stat_1 ~ '**Female**', #is markdown **bold** formatting
+      statistic ~ "**t-value**",
+      stat_1 ~ '**Female**',
+      #is markdown **bold** formatting
       stat_2 ~ '**Male**',
-      p.value ~ '**P-value**')
+      p.value ~ '**P-value**'
+    )
   )
 
-#show_header_names(table_Draco) 
+#show_header_names(table_Draco1) 
 #lets you preview code for changing header names and formatting  
                 
 table_Draco1
