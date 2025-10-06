@@ -1,5 +1,5 @@
 ---
-title: "gtsummary: Making Summary Tables for Publications"
+title: "`gtsummary`: Making Summary Tables for Publications"
 output:
   html_document:
     df_print: paged
@@ -11,6 +11,9 @@ library(gtsummary)
 library(gt)
 library(palmerpenguins)
 library(flextable)
+library(cardx)
+library(broom)
+library(broom.helpers)
 ```
 
 ```{r run scripts, include=FALSE}
@@ -32,7 +35,7 @@ tbl_summary(trial, by = trt)
 
 ![](../images/code_to_table.png)
 
-**Example 1 t-test: Summarizing/Comparing Two Groups**
+## Example 1 t-test: Summarizing/Comparing Two Groups
 
 ![](../images/draco_pic.jpeg)
 
@@ -67,6 +70,7 @@ theme_gtsummary_mean_sd(set_theme = TRUE)
 
 table_Draco1 <- draco_ecomorph %>%
   filter(species == "bimaculatus") %>%
+  # select variables to be summarized
   select(
     sex,
     snout_vent_length_mm,
@@ -75,13 +79,13 @@ table_Draco1 <- draco_ecomorph %>%
     fore_toe_length_mm,
     perch_height_cm
   ) %>%
-  #retain specific variables used in summaries rather than using all
+  # retain specific variable used to define categories for comparison
   tbl_summary(
     by = sex,
     missing = "no",
-    # remove missing values (NAs). "ifany" will include a missing values row in table.
+  # remove missing values (NAs). "ifany" will include a missing values row in table.
     digits = all_continuous() ~ 1,
-    #number of displayed digits for continuous variables
+  # number of displayed digits for continuous variables
     statistic = list(all_continuous() ~ "{mean} ({sd})", #can use any character for parentheses
                      all_categorical() ~ "{n}"), #count obs. for categorical variables
     label = list(
@@ -118,8 +122,10 @@ table_Draco1 <- table_Draco1 %>%
                 
 table_Draco1
 ```
+\
+\
 
-**Example 2 ANOVA Lizards: Summarizing/Comparing Three Groups**
+## Example 2 ANOVA Lizards: Summarizing/Comparing Three Groups
 
 ```{r example 1 make the table}
 #this function works best with datasets without NA values
@@ -152,10 +158,10 @@ table_Draco2 <- draco_ecomorph %>%
   modify_header(
     update = list(
       label ~ '',
-      stat_1 ~ '**D. bimaculatus**',
-      stat_2 ~ '**D. cornutus**',
-      stat_3 ~ '**D. melanopogon**',
-      p.value ~ '**P-value**'
+      stat_1 ~ '*D. bimaculatus*',
+      stat_2 ~ '*D. cornutus*',
+      stat_3 ~ '*D. melanopogon*',
+      p.value ~ 'P-value'
     )
   )
 
@@ -190,7 +196,7 @@ Every function in `gt` is available to use with a {gtsummary} object.
 2.  Convert the table to a `gt` object with the `as_gt()` function.
 3.  Continue formatting as a `gt` table with any `gt` function.
 
-**Example 3 ANOVA Penguins**
+## Example 3 ANOVA Penguins
 
 ```{r palmer penguins data}
 table_penguins <- penguins %>%
@@ -215,7 +221,7 @@ table_penguins <- penguins %>%
 table_penguins
 ```
 
-**Example 4 ANCOVA Lizards**
+## Example 4 ANCOVA Lizards
 
 ```{r data import and filter, message=FALSE, warning=FALSE}
 draco_bimaculatus <- draco_ecomorph %>%
