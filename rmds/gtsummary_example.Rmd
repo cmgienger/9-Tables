@@ -278,13 +278,25 @@ table_penguins <- penguins %>%
                                all_categorical() ~ "{n}")) %>% #count obs. for categorical variables
   add_p(pvalue_fun = ~style_pvalue(.x, digits = 2)) %>% #number of digits displayed for p-values
   modify_caption("Table 3. Palmer Penguin Morphometrics") %>%
-  modify_header(update = all_stat_cols() ~ "**{level}**") %>% #headers to only contain species name
-  as_gt() %>% #have to convert to gt object for some types of formatting
-  gt::tab_options(heading.align = "left")
-#table caption appears left aligned AFTER it is knit to html.
+  modify_header(update = all_stat_cols() ~ "**{level}**") #headers to only contain species name
 
 table_penguins
 ```
+
+Convert table to a `gt` object for more formatting options.
+
+```{r gt theme}
+table_penguins %>%
+  as_gt() %>% 
+  opt_stylize(style = 6, color = 'gray') %>%
+  tab_header(title = md("**Penguin Measurements**")) %>%
+  opt_align_table_header(align = "left") %>%
+  tab_options(heading.align = "left")
+
+#heading.align controls the horizontal alignment of both title and subtitle.
+#opt_align_table_header(align = "left") only affects column headers, not the table title.
+```
+
 
 ## Example 4 ANCOVA Lizards
 
