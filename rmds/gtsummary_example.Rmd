@@ -1,8 +1,11 @@
 ---
-title: "`gtsummary`: Making Summary Tables for Publications"
+title: "Making Summary Tables for Publications Using `gtsummary`"
 output:
   html_document:
     df_print: paged
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
 
 ```{r setup, warning = FALSE, message = FALSE}
@@ -11,9 +14,9 @@ library(gtsummary)
 library(gt)
 library(palmerpenguins)
 library(flextable)
-library(cardx)
-library(broom)
-library(broom.helpers)
+#library(cardx)
+#library(broom)
+#library(broom.helpers)
 ```
 
 ```{r run scripts, include=FALSE}
@@ -24,8 +27,29 @@ Lets peek at the documentation for `gtsummary`
 
 <https://www.danieldsjoberg.com/gtsummary/>
 
-It is very common (especially in biomedical literature) for the first table of the paper to summarize attributes of the participants in the study.
-This is a first look at whether the study could have some built-in demographic bias.
+It is very common (especially in biomedical literature) for the first
+table of the paper to summarize attributes of the participants in the
+study. This is a first look at whether the study could have some
+built-in demographic bias. We will use the built-in dataset
+`trial` from `gtsummary`.
+
+```{r}
+head(trial)
+```
+
+Data are baseline characteristics of 200 cancer patients who received
+Drug A or Drug B with the outcome of tumor response to the treatment.
+
+Variables:
+
+- **trt** - Chemotherapy Treatment (Drug A or B)
+- **age** - Age 
+- **marker** - Marker Level (ng/mL) 
+- **stage** - T Stage 
+- **grade** - Grade
+- **response** - Tumor Response 
+- **death** - Patient Died 
+- **ttdeath** - Months to Death/Censor
 
 ```{r Table 1 type example from documentation}
 tbl_summary(trial, by = trt) 
@@ -35,29 +59,43 @@ tbl_summary(trial, by = trt)
 
 ![](../images/code_to_table.png)
 
+
+But the real value of `gtsummary` is that it will calculate statistics for comparison winthin/amomg groups. This might save you a lot of tedious and repetitive analyses.
+
 ## Example 1 t-test: Summarizing/Comparing Two Groups
 
 ![](../images/draco_pic.jpeg)
 
 ```{r data import, message=FALSE, warning=FALSE}
 draco_ecomorph <- read_csv("../data/draco_ecomorph.csv")
-##..means look up one level for the 'data' folder
+#..means look up one level for the 'data' folder
 ```
+```{r}
+glimpse(draco_ecomorph)
+unique(draco_ecomorph$species)
+unique(draco_ecomorph$location)
+```
+
+
 
 ```{r basic summary}
 # summarize the data; summary includes all species, so not that helpful yet
-table1 <- 
+table1 <-
   draco_ecomorph %>%
-  tbl_summary(by=sex,
-              missing = "no", #gets rid of pesky NAs
-              include = c(snout_vent_length_mm, tail_length_mm, fore_limb_length_mm))
+  tbl_summary(
+    by = sex,
+    missing = "no", #gets rid of pesky NAs
+    include = c(snout_vent_length_mm, tail_length_mm, fore_limb_length_mm)
+  )
 
 table1
 ```
 
-Note that the default here is median and IQR for summary statistics; not what we might want.
-You can change the default behavior by setting a theme, or define manually (I prefer manually for complete control).
-Its more customary to use mean and SD (or SE) to summarize groups since we are most likely going to use parametric statistics for comparison.
+Note that the default here is **median** and **IQR** for summary statistics; not
+what we might want. You can change the default behavior by setting a
+theme, or define manually (I prefer manually for complete control). Its
+more customary to use mean and SD (or SE) to summarize groups since we
+are most likely going to use parametric statistics for comparison.
 
 ```{r set builtin theme}
 theme_gtsummary_mean_sd(set_theme = TRUE)
@@ -98,7 +136,8 @@ table_Draco1 <- draco_ecomorph %>%
 table_Draco1
 ```
 
-Now lets pretty the table up a bit and make it a statistical comparison table.
+Now lets pretty the table up a bit and make it a statistical comparison
+table.
 
 ```{r t-test example pretty the table, message=FALSE, warning=FALSE}
 table_Draco1 <- table_Draco1 %>%
@@ -109,10 +148,9 @@ table_Draco1 <- table_Draco1 %>%
   modify_header(
     update = list(
       label ~ '',
-      statistic ~ "**t-value**",
       stat_1 ~ '**Female**',
-      #is markdown **bold** formatting
       stat_2 ~ '**Male**',
+      statistic ~ "**t-value**",
       p.value ~ '**P-value**'
     )
   )
@@ -122,6 +160,7 @@ table_Draco1 <- table_Draco1 %>%
                 
 table_Draco1
 ```
+
 \
 \
 
@@ -142,19 +181,18 @@ table_Draco2 <- draco_ecomorph %>%
     #number of displayed digits for continuous variables
     label = list(
       snout_vent_length_mm ~ "SVL (mm)",
-      #change column labels in table
       perch_height_cm ~ "Perch Height (cm)",
       sex ~ "Sex"
+      #change column labels in table
     ),
     statistic = list(all_continuous() ~ "{mean} ({sd})", #can use any character for parentheses
-                     all_categorical() ~ "{n}")
-  ) %>% #count obs. for categorical variables
-  #add_p(snout_vent_length_mm ~ "aov") %>% CANT FIGURE OUT HOW TO FORCE ANOVA
+                     all_categorical() ~ "{n}")  #count obs. for categorical variables
+  ) %>%
   add_p(pvalue_fun = ~ style_pvalue(.x, digits = 2)) %>% #number of digits displayed for p-values
   modify_caption("Table 2. Lizard and Habitat Characteristics") %>%
   #modify_header(update = all_stat_cols() ~ "**{level}**") %>%  #headers to only contain species name
   #modify_footnote(all_stat_cols() ~ NA) %>% #squashes superscripts for the groups
-  modify_footnote(everything() ~ NA) %>%
+  #modify_footnote(everything() ~ NA) %>%  #keeps-removes footnotes telling what tests were conducted
   modify_header(
     update = list(
       label ~ '',
@@ -183,14 +221,40 @@ table_Draco2 %>%
   #gt::gtsave(filename = "draco_ecomorph_table.pdf") #save file
 ```
 
-If data have missing values that make groups unbalanced, might have to make more than one table and combine them.
-Parts of a gt table: <https://gt.rstudio.com/articles/intro-creating-gt-tables.html>
+\
+\
 
-Advanced Customization
+**How `add_p()` decides which test to run**
 
-It's natural a `gtsummary` user would want to customize the aesthetics of the table with one or more of the many `gt` functions available.
+Without specifying the test = argument, `gtsummary` **automatically
+chooses the test** based on the variable type and number of groups in
+`tbl_summary`(by =...)
 
-Every function in `gt` is available to use with a {gtsummary} object.
+Here’s what happens internally:
+
+::: {style="text-align:center; border:1px solid #888; border-radius:6px; padding:10px;"}
+| Variable type | \# of groups (`by`) | Default test used by `add_p()`                                      |
+|--------------|-------------:|-------------------------------------------|
+| Continuous    |                   2 | `t.test()` (Welch two-sample t-test)                                |
+| Continuous    |                 \>2 | `kruskal.test()` (Kruskal–Wallis test — nonparametric one-way test) |
+| Categorical   |                   2 | `fisher.test()` (Fisher’s exact)                                    |
+| Categorical   |                 \>2 | `chisq.test()` (Chi-square test)                                    |
+:::
+
+\
+
+If you want a traditional parametric one-way test (e.g. ANOVA for 3 or
+more groups) use: `add_p`(test = \~"oneway.test")
+
+\
+\
+
+**Advanced Customization**
+
+It's natural a `gtsummary` user would want to customize the aesthetics
+of the table with one or more of the many `gt` functions available. `gt` is the table equivalent of `ggplot2`; very powerful and you can change/customize just about everything. 
+
+Every function in `gt` is available to use with a `gtsummary` object.
 
 1.  Create a `gtsummary` table.
 2.  Convert the table to a `gt` object with the `as_gt()` function.
@@ -237,10 +301,12 @@ ex4 <- draco_bimaculatus%>%
               #statistic=list(all_continuous()~"{mean}({sd})"), 
               #missing="no",
               digits = all_continuous() ~ 1,
-              include=c(tail_length_mm, fore_limb_length_mm, hind_limb_length_mm),
-              )%>%
-  add_difference(adj.vars=c(snout_vent_length_mm)) #this one line turns it from an ANOVA to an ANCOVA table (magic)
-  #add_p(pvalue_fun = ~ style_pvalue(.x, digits = 2))   #cannot get to work; throws error
+              include=c(tail_length_mm, fore_limb_length_mm, hind_limb_length_mm)) %>%
+add_difference(
+    adj.vars = c(snout_vent_length_mm), #this line turns it from an ANOVA to an ANCOVA table (magic)
+    # adjust the variables being compared between sexes by the snout_vent_length variable
+    pvalue_fun = ~style_pvalue(.x, digits = 2)  # control p-value rounding here
+  )
 
 ex4
 ```
@@ -256,7 +322,10 @@ ex4 %>%
 t.test(snout_vent_length_mm~sex, data=draco_bimaculatus)
 ```
 
-SVL variable (snout_vent_length_mm) is excluded from table above; if you wanted to include it, you would need to explain the table in more depth because it has both a single t-test for SVL (raw means) and a bunch on ANCOVAs for the other variables (presenting marginal means).
+SVL variable (snout_vent_length_mm) is excluded from table above; if you
+wanted to include it, you would need to explain the table in more depth
+because it has both a single t-test for SVL (raw means) and a bunch on
+ANCOVAs for the other variables (presenting marginal means).
 
 ```{r see if gtsummary results match a generic GLM result}
 model_1 <- lm(tail_length_mm ~ snout_vent_length_mm + sex, data=draco_bimaculatus)
@@ -275,18 +344,21 @@ ggplot(model_1) +
   theme_cmg() #this was my theme defined in a script
 ```
 
-For tail length, the adjusted difference and P-value matches `gtsummary` output.
-There is not a noticeable difference in tail length between the sexes at the grand mean.
+For tail length, the adjusted difference and P-value matches `gtsummary`
+output. There is not a noticeable difference in tail length between the
+sexes at the grand mean.
 
 Notice also the technique for plotting an ANCOVA model using `fortify`.
-Open the `model_1_fortified` dataframe to see what a fortified dataset looks like; applies model calculations to the original dataset.
+Open the `model_1_fortified` dataframe to see what a fortified dataset
+looks like; applies model calculations to the original dataset.
 
 ```{r check model coefficients}
 summary(model_1)$coefficients["sexmale","Estimate"] #adjusted difference between marginal means
 summary(model_1)$coefficients["sexmale","Pr(>|t|)"] #p-value comparing adjusted means
 ```
 
-If more formatting is required, likely have to convert `gtsummary` object to a `gt` object and modify with `gt` package.
+If more formatting is required, likely have to convert `gtsummary`
+object to a `gt` object and modify with `gt` package.
 
 Other worked examples:
 

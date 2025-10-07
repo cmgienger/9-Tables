@@ -19,16 +19,24 @@ data <- read_csv("../data/shelter_attributes.csv")
 
 ```{r select variables}
 data_summary2 <- data %>% 
-  dplyr::select(Treatment, Height, Width, Depth, Roof, Floor, `Logger Depth`) #grouping variable and measurement variables
-  
+  dplyr::select(Treatment, Height, Width, Depth, Roof, Floor, `Logger Depth`) %>%
+  mutate(
+    Roof = as.numeric(Roof),
+    Floor = as.numeric(Floor)) 
+#grouping variable and measurement variables
 #notice that I had to use back ticks to surround variable containing space
 #spaces in variable names is bad practice
+
+
 ```
 
 ```{r make summary table with gtsummary, message=FALSE, warning=FALSE}
 data_summary2 %>%
   tbl_summary(by = Treatment) %>%
-  add_p()
+  add_p(test = all_categorical() ~ "fisher.test",
+      test.args = all_categorical() ~ list(simulate.p.value = TRUE, B = 10000)) #work around for memory error
+
+  #add_p()
 ```
 
 ```{r second summary}
@@ -51,7 +59,7 @@ table1 <-
               `Logger Depth` ~ "Logger Depth (cm)"),
     missing_text = "(Missing)"
   ) %>%
-  add_p()
+  add_p(test = everything() ~ "oneway.test") #this is an one-way ANOVA
 
 table1
 ```
@@ -75,7 +83,7 @@ table1
 #Can put details of statistical tests in Table caption
 #after exporting to word processing program.
 
-#post-hoc comparisons among groups not supported currently in gtsummary; might be able to do that manually in gt
+#post-hoc comparisons among groups are not easily supported currently in gtsummary (technically possible); https://www.danieldsjoberg.com/gtsummary/reference/add_difference_row.tbl_summary.html
 ```
 
 ```{r export table to docx}
