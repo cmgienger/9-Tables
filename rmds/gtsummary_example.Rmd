@@ -141,7 +141,7 @@ table_Draco1 <- table_Draco1 %>%
   add_p(test = all_continuous() ~ "t.test",
         pvalue_fun = ~ style_pvalue(.x, digits = 2)) %>% #number of sig. digits displayed for p-values
   modify_caption("Table 1. *Draco bimaculatus* Morphological Characteristics") %>%
-  modify_fmt_fun(statistic ~ style_sigfig) %>% #adjusts sig .figs. for test stat colum (t-value)
+  modify_fmt_fun(statistic ~ style_sigfig) %>% #adjusts sig .figs. for test stat column (t-value)
   modify_header(
     update = list(
       label ~ '',
@@ -151,7 +151,7 @@ table_Draco1 <- table_Draco1 %>%
       p.value ~ '**P-value**'
     )
   )
-                
+
 table_Draco1
 ```
 \
@@ -204,9 +204,6 @@ table_Draco2 <- draco_ecomorph %>%
     )
   )
 
-#show_header_names(table_Draco1) 
-#lets you preview code for changing header names and formatting  
-                
 table_Draco2
 ```
 
@@ -252,8 +249,7 @@ more groups) use: `add_p`(test = \~"oneway.test")
 
 **Advanced Customization**
 
-It's natural a `gtsummary` user would want to customize the aesthetics
-of the table with one or more of the many `gt` functions available. `gt` is the table equivalent of `ggplot2`; very powerful and you can change/customize just about everything. 
+It's natural a `gtsummary` user would want to customize the aestheticsof the table with one or more of the many `gt` functions available. `gt` is the table equivalent of `ggplot2`; very powerful and you can change/customize just about everything. 
 
 Every function in `gt` is available to use with a `gtsummary` object.
 
@@ -279,19 +275,22 @@ table_penguins <- penguins %>%
   add_p(pvalue_fun = ~style_pvalue(.x, digits = 2)) %>% #number of digits displayed for p-values
   modify_caption("Table 3. Palmer Penguin Morphometrics") %>%
   modify_header(update = all_stat_cols() ~ "**{level}**") #headers to only contain species name
-
+  
 table_penguins
 ```
+
+\
 
 Convert table to a `gt` object for more formatting options.
 
 ```{r gt theme}
 table_penguins %>%
   as_gt() %>% 
-  opt_stylize(style = 6, color = 'gray') %>%
+  opt_stylize(style = 6, color = 'gray', add_row_striping = TRUE) %>%
   tab_header(title = md("**Penguin Measurements**")) %>%
   opt_align_table_header(align = "left") %>%
-  tab_options(heading.align = "left")
+  tab_options(heading.align = "left") %>%
+  tab_source_note(source_note = md("Source: Gorman KB, Williams TD, Fraser WR (2014). Ecological sexual dimorphism and environmental variability within a community of Antarctic penguins (genus *Pygoscelis*). PLoS ONE 9(3):e90081. https://doi.org/10.1371/journal.pone.0090081."))
 
 #heading.align controls the horizontal alignment of both title and subtitle.
 #opt_align_table_header(align = "left") only affects column headers, not the table title.
