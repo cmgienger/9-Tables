@@ -23,11 +23,10 @@ data_summary2 <- data %>%
   mutate(
     Roof = as.numeric(Roof),
     Floor = as.numeric(Floor)) 
+
 #grouping variable and measurement variables
 #notice that I had to use back ticks to surround variable containing space
 #spaces in variable names is bad practice
-
-
 ```
 
 ```{r make summary table with gtsummary, message=FALSE, warning=FALSE}

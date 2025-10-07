@@ -14,9 +14,6 @@ library(gtsummary)
 library(gt)
 library(palmerpenguins)
 library(flextable)
-#library(cardx)
-#library(broom)
-#library(broom.helpers)
 ```
 
 ```{r run scripts, include=FALSE}
@@ -95,7 +92,7 @@ Note that the default here is **median** and **IQR** for summary statistics; not
 what we might want. You can change the default behavior by setting a
 theme, or define manually (I prefer manually for complete control). Its
 more customary to use mean and SD (or SE) to summarize groups since we
-are most likely going to use parametric statistics for comparison.
+are most likely going to use parametric statistics for comparison. So after applying that theme, every new table will show **mean(SD)** for continuous variables — unless you explicitly override it in the `statistic=` argument.
 
 ```{r set builtin theme}
 theme_gtsummary_mean_sd(set_theme = TRUE)
@@ -142,7 +139,7 @@ table.
 ```{r t-test example pretty the table, message=FALSE, warning=FALSE}
 table_Draco1 <- table_Draco1 %>%
   add_p(test = all_continuous() ~ "t.test",
-        pvalue_fun = ~ style_pvalue(.x, digits = 2)) %>% #number of digits displayed for p-values
+        pvalue_fun = ~ style_pvalue(.x, digits = 2)) %>% #number of sig. digits displayed for p-values
   modify_caption("Table 1. *Draco bimaculatus* Morphological Characteristics") %>%
   modify_fmt_fun(statistic ~ style_sigfig) %>% #adjusts sig .figs. for test stat colum (t-value)
   modify_header(
@@ -154,12 +151,16 @@ table_Draco1 <- table_Draco1 %>%
       p.value ~ '**P-value**'
     )
   )
-
-#show_header_names(table_Draco1) 
-#lets you preview code for changing header names and formatting  
                 
 table_Draco1
 ```
+\
+
+```{r}
+show_header_names(table_Draco1) 
+#lets you preview code for changing header names and formatting
+```
+
 
 \
 \
