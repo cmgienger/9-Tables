@@ -13,55 +13,54 @@ library(gtsummary)
 library(Rmisc)
 library(tidyverse)
 library(flextable)
+library(janitor)
 
 data <- read_csv("../data/shelter_attributes.csv")
 ```
 
-```{r select variables}
+```{r look at data structure}
+glimpse(data)
+```
+
+```{r}
+data <- data %>% clean_names() %>% #makes variable have consistent formatting and pretty
+  glimpse()
+```
+
+```{r select and format variables}
 data_summary2 <- data %>% 
-  dplyr::select(Treatment, Height, Width, Depth, Roof, Floor, `Logger Depth`) %>%
+  dplyr::select(treatment, height, width, depth, roof, floor, logger_depth) %>%
   mutate(
-    Roof = as.numeric(Roof),
-    Floor = as.numeric(Floor)) 
+    roof = as.numeric(roof),
+    floor = as.numeric(floor),
+    logger_depth = as.numeric(logger_depth)) 
 
 #grouping variable and measurement variables
-#notice that I had to use back ticks to surround variable containing space
-#spaces in variable names is bad practice
 ```
 
 ```{r make summary table with gtsummary, message=FALSE, warning=FALSE}
-data_summary2 %>%
-  tbl_summary(by = Treatment) %>%
-  add_p(test = all_categorical() ~ "fisher.test",
-      test.args = all_categorical() ~ list(simulate.p.value = TRUE, B = 10000)) #work around for memory error
+#Use the type = argument to override gtsummary’s automatic classification. In this case
+#it took several attempts to force roof and floor variables to be numeric. 
 
-  #add_p()
-```
-
-```{r second summary}
-#sometimes you have to force continuous variables into the proper format; R might think they represent categories
-#https://stackoverflow.com/questions/67388749/r-tbl-summary-treating-continuous-variables-correctly
-
-table1 <- 
-  data_summary2 %>%
+table1 <- data_summary2 %>%
   tbl_summary(
-    type = list(where(is.numeric) ~ "continuous"), #forces all numeric variables to be continuous
-    by = Treatment,
-    statistic = list(
-      all_continuous() ~ "{mean} ({sd})",
-      all_categorical() ~ "{n} / {N}"
-    ),
+    by = treatment,
+    type = list(roof ~ "continuous", floor ~ "continuous"),
+    statistic = all_continuous() ~ "{mean} ({sd})",
     digits = all_continuous() ~ 1,
-    label = list(Width ~ "Width (cm)",       #add units to row labels
-              Height ~ "Height (cm)",
-              Depth ~ "Depth (cm)",
-              `Logger Depth` ~ "Logger Depth (cm)"),
+    label = list(
+      width ~ "Width (cm)",
+      height ~ "Height (cm)",
+      depth ~ "Depth (cm)",
+      logger_depth ~ "Logger Depth (cm)"
+    ),
     missing_text = "(Missing)"
   ) %>%
-  add_p(test = everything() ~ "oneway.test") #this is an one-way ANOVA
+  add_p(test = everything() ~ "oneway.test")
 
 table1
 ```
+
 
 ```{r show current values of the header, message=FALSE, warning=FALSE}
 show_header_names(table1)
@@ -76,13 +75,14 @@ table1 <- table1 %>%
   stat_3 = '**Random**',
   p.value = '**p-value**') %>%
   modify_footnote(everything() ~ NA) #gets rid of superscripts and footnotes; put them in table caption instead.
-
+  
 table1
+
 #now you have a very clean table; most journals do not permit superscripts in tables.
 #Can put details of statistical tests in Table caption
 #after exporting to word processing program.
 
-#post-hoc comparisons among groups are not easily supported currently in gtsummary (technically possible); https://www.danieldsjoberg.com/gtsummary/reference/add_difference_row.tbl_summary.html
+#post-hoc comparisons among groups are not easily supported currently in gtsummary (although technically possible); https://www.danieldsjoberg.com/gtsummary/reference/add_difference_row.tbl_summary.html
 ```
 
 ```{r export table to docx}
@@ -105,3 +105,5 @@ table1 %>%
   as_flex_table() %>%
   flextable::save_as_docx(path = "../figs/table1_flextable.docx")
 ```
+
+
