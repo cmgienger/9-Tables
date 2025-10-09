@@ -20,9 +20,10 @@ data <- read_csv("../data/shelter_attributes.csv")
 
 ```{r look at data structure}
 glimpse(data)
+#wow, there are some problems with variable names.
 ```
 
-```{r}
+```{r clean variable names}
 data <- data %>% clean_names() %>% #makes variable have consistent formatting and pretty
   glimpse()
 ```
