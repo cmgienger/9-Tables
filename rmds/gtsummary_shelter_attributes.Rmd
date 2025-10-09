@@ -53,6 +53,8 @@ table1 <- data_summary2 %>%
       width ~ "Width (cm)",
       height ~ "Height (cm)",
       depth ~ "Depth (cm)",
+      roof ~ "Roof",
+      floor ~ "Floor",
       logger_depth ~ "Logger Depth (cm)"
     ),
     missing_text = "(Missing)"
