@@ -209,7 +209,7 @@ table_Draco2
 
 \
 
-You can manually append data to an existing `gtsummary` table using the `modify_table_body()` function. Fist you need to make a data of the data you want to append. I'm using categories here because those are not a part of the summary calculations of the table. 
+You can manually append data to an existing `gtsummary` table using the `modify_table_body()` function. First you need to make a data of the data you want to append. I'm using categories here because those are not a part of the summary calculations of the table. 
 
 \
 
