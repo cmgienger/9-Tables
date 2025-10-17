@@ -17,7 +17,9 @@ library(janitor)
 data <- read_csv("../data/shelter_attributes.csv")
 ```
 
-![](images/brown_shelter_temp.png)
+![](../images/brown_shelter_temp.png)
+
+![](../images/Repp_shelter.jpg){width="600"}
 
 ```{r look at data structure}
 glimpse(data)

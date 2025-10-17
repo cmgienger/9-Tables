@@ -207,14 +207,59 @@ table_Draco2 <- draco_ecomorph %>%
 table_Draco2
 ```
 
+\
+
+You can manually append data to an existing `gtsummary` table using the `modify_table_body()` function. Fist you need to make a data of the data you want to append. I'm using categories here because those are not a part of the summary calculations of the table. 
+
+\
+
+```{r manually append data}
+# A list (or named vector) of new values to append
+custom_values <- tibble::tibble(
+  variable = c("elevation", "activity"),
+  label = c("Elevation", "Activity"),
+  stat_1 = c("Low", "Nocturnal"),
+  stat_2 = c("Medium", "Nocturnal"),
+  stat_3 = c("High", "Diurnal")
+)
+
+custom_values
+
+```
+
+```{r Append the new rows}
+# Append the new rows to the bottom of the table
+table_Draco3 <- table_Draco2 %>%
+  modify_table_body(
+    ~ bind_rows(.x, custom_values)
+    # take the existing table (.x) and attach custom_values underneath it as new rows.
+  )
+
+table_Draco3
+```
+
+```{r add new rows at top of table}
+#Insert new rows before or after a specific index using `.before` or `.after`.
+
+table_Draco4 <- table_Draco2 %>%
+  modify_table_body(
+    ~ add_row(.x, custom_values, .before = 1) #number is index number of row
+    # take the existing table (.x) and attach custom_values before the 1st row.
+  )
+
+table_Draco4
+```
+
+
+
 ```{r export table_Draco2 to docx via flextable}
-table_Draco2 %>%
+table_Draco3 %>%
   as_flex_table() %>%
-  flextable::save_as_docx(path = "../figs/table_Draco2.docx")
+  flextable::save_as_docx(path = "../figs/table_Draco3.docx")
 ```
 
 ```{r save Draco table}
-#table_Draco2 %>% 
+#table_Draco3 %>% 
   #as_gt() %>%   # convert to gt table for additional formatting options and saving
   #gt::gtsave(filename = "draco_ecomorph_table.pdf") #save file
 ```
